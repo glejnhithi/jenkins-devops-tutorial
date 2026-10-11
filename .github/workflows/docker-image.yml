@@ -14,12 +14,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: docker login
+    - name: Docker Hub Login
       env:
-        DOCKER_USER: ${{secrets.DOCKER_USER}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+        test -n "$DOCKER_USER" || { echo "DOCKER_USER missing"; exit 1; }
+        test -n "$DOCKER_PASSWORD" || { echo "DOCKER_PASSWORD missing"; exit 1; }
+        echo "$DOCKER_PASSWORD" | docker login \
+          --username "$DOCKER_USER" \
+          --password-stdin
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag glejnhithi/jenkins-test:$(date +%s)
       
